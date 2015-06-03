@@ -30,6 +30,3 @@ class WebServer
     ].join("\r\n")
   end
 end
-
-server = WebServer.new proc{ [200, 'text/plain', 'Result'] }
-server.run
