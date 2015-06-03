@@ -6,6 +6,8 @@ Start app
 bin/server
 ```
 
+Server user a racke simillar interface.
+
 Application located in application.rb
 
 WebServer located in web_server.rb
