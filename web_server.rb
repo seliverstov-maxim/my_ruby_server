@@ -16,6 +16,9 @@ class WebServer
       loop do
         socket = @server.accept
         request = socket.gets
+        # TODO: Any query performed as executable code.
+        # NEED: Detect non executable files.
+        # NEED: Detect /../../password paths and remove it.
         socket.print(perform_app({request: request}))
         socket.close
       end
@@ -26,7 +29,6 @@ class WebServer
   end
 
   def perform_app(env={})
-    STDERR.puts env[:request]
     app_response = @app.call(env)
     res= [
       "HTTP/1.1 #{app_response[0]}",
