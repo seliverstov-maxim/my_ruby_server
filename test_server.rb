@@ -1,30 +1,35 @@
 require 'socket'
 
-server = TCPServer.new('localhost', 2345)
+class WebServer
+  attr_accessor :server, :host, :port
 
-loop do
-  socket = server.accept
-  request = socket.gets
-  STDERR.puts request
-  output = 'Hello World'
-  response = [
-    "HTTP/1.1 200 OK",
-    "Content-Type: text/plain",
-    "Content-Length: #{output.bytesize}",
-    "Connection: close",
-    "",
-    output
-  ].join("\r\n")
-  socket.print response
+  def initialize(app, attrs={})
+    @app = app
+    @server = TCPServer.new(attrs.fetch(:host, 'localhost'), attrs.fetch(:port, 2345))
+  end
 
+  def run
+    loop do
+      socket = server.accept
+      request = socket.gets
+      socket.print(perform_app({request: request}))
+      socket.close
+    end
+  end
 
-
-  # response =   "HTTP/1.1 200 OK\r\n" +
-  #              "Content-Type: text/plain\r\n" +
-  #              "Content-Length: #{output.bytesize}\r\n" +
-  #              "Connection: close\r\n\r\n" +
-  #              output
-  # socket.print response
-  # STDERR.puts response
-  socket.close
+  def perform_app(env={})
+    STDERR.puts env[:request]
+    app_response = @app.call(env)
+    res= [
+      "HTTP/1.1 #{app_response[0]}",
+      "Content-Type: #{app_response[1]}",
+      "Content-Length: #{app_response[2].bytesize}",
+      "Connection: close",
+      "",
+      app_response[2]
+    ].join("\r\n")
+  end
 end
+
+server = WebServer.new proc{ [200, 'text/plain', 'Result'] }
+server.run
