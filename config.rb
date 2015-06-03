@@ -1,4 +1,6 @@
 require 'web_server.rb'
-require 'my_app'
+require 'application.rb'
 
-WebServer.new(MyApp).run
+app = Application.new
+server = WebServer.new(app)
+server.run

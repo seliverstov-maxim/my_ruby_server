@@ -1,20 +1,28 @@
 require 'socket'
 
 class WebServer
-  attr_accessor :server, :host, :port
+  attr_accessor :host, :port
 
   def initialize(app, attrs={})
     @app = app
-    @server = TCPServer.new(attrs.fetch(:host, 'localhost'), attrs.fetch(:port, 2345))
+    @host = attrs.fetch(:host, 'localhost')
+    @port = attrs.fetch(:port, 2345)
+    @server = TCPServer.new(@host, @port)
   end
 
   def run
-    loop do
-      socket = server.accept
-      request = socket.gets
-      socket.print(perform_app({request: request}))
-      socket.close
+    begin
+      puts "You start webserver on http://#{@host}:#{@port}. Press ctrl-C for exit."
+      loop do
+        socket = @server.accept
+        request = socket.gets
+        socket.print(perform_app({request: request}))
+        socket.close
+      end
+    rescue Interrupt => e
+      puts "\nServer was stopped."
     end
+
   end
 
   def perform_app(env={})
